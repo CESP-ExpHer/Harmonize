@@ -89,6 +89,10 @@ test.saveResult(outputDir=outputDir)
 ### <a id="harmonize" /> Harmonize
 The Harmonize module takes two GWAS summary statistics in order to make the effect of a SNP on the reference and the effect of that SNP on the target must correspond the the same allele. 
 
+**!!! IMPORTANT !!!**
+
+- You need to **Standardize** each GWAS summary statistics first before running **Harmonize**
+
 Some examples are shown below:
 #### Correct, unambigious
 ```c
