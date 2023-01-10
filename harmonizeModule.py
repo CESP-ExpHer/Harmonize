@@ -208,8 +208,8 @@ class Harmonize():
                         resultDict['diffGenotyped'].append(diffGenotypedList)
 
             except KeyError:
-                nb_removed += 1
                 if self.intersection == True:
+                    nb_removed += 1
                     removedList = [target_SNP, target_chr, target_pos, target_nonEffectAllele,target_EffectAllele,
                                            str(target_EAF), str(target_beta), str(target_sd), str(target_pValue), str(MAF)]
                     resultDict['removed'].append(removedList)
