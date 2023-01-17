@@ -184,10 +184,10 @@ class Harmonize():
                             (alt_target_nonEffectAllele == ref_nonEffectAllele and alt_target_EffectAllele == ref_EffectAllele):
 
                         # The defaulf value of the maximum difference between ref_EAF and target_EAF is 0.6 ;
-                        # => In other words, comparison between at least 0.2 vs 0.8 is the miminum
-                        if abs(float(ref_EAF) - float(target_EAF)) >= 0.6:
+                        # => In other words, comparison between at least 0.3 vs 0.7 is the miminum
+                        if abs(float(ref_EAF) - float(target_EAF)) >= 0.4:
                             nb_changed += 1
-                            harmonizedList = [target_SNP, target_chr, target_pos, target_nonEffectAllele,target_EffectAllele,
+                            harmonizedList = [target_SNP, target_chr, target_pos, target_EffectAllele, target_nonEffectAllele,
                                                str(1 - float(target_EAF)), str(-float(target_beta)), str(target_sd),
                                                str(target_pValue), str(MAF)]
                             changedList = [target_SNP, target_chr, target_pos, ref_nonEffectAllele,
@@ -260,10 +260,10 @@ class Harmonize():
 if __name__ == "__main__":
 
     # Define the full path where reference file is located.
-    referenceFile = '/home2/users/park/python_projects/harmonize/test/EPITHYR/standardized.txt'
+    referenceFile = '/home2/users/park/python_projects/harmonize/test/UKBB_EPITHYR_0.3/harmonized.txt'
 
     # Define tge full path where target file is located.
-    targetFile = '/home2/users/park/python_projects/harmonize/test/UKBB/standardized.txt'
+    targetFile = '/home2/users/park/python_projects/harmonize/test/UKBB_EPIC_0.3/harmonized.txt'
 
     # Define the column name in your own GWAS Summary Statistics
     # User needs to modify the 'value' part of the refInfoDict
@@ -275,21 +275,21 @@ if __name__ == "__main__":
                    'EAF': 'freq2'}
 
     # User needs to modify the 'value' part of the targetInfoDict
-    targetInfoDict = {'SNP': 'ID',
-                      'Chromosome': '#CHROM',
-                      'Position': 'POS',
-                      'nonEffectAllele': 'ALT',
-                      'EffectAllele': 'REF',
-                      'EAF': 'A1_FREQ',
-                      'Beta': 'BETA',
-                      'SD': 'SE',
-                      'p-value': 'P'}
+    targetInfoDict = {'SNP': 'SNP',
+                      'Chromosome': 'chr',
+                      'Position': 'pos',
+                      'nonEffectAllele': 'A1',
+                      'EffectAllele': 'A2',
+                      'EAF': 'freq2',
+                      'Beta': 'beta',
+                      'SD': 'sd',
+                      'p-value': 'p'}
 
     # True if user wants to include only overlapped SNPs (intersection)
-    intersection = True
+    intersection = False
 
     # Define the output directory where you want to save the result.
-    outputDir = '/home2/users/park/python_projects/harmonize/test/EPITHYR_UKBB'
+    outputDir = '/home2/users/park/python_projects/harmonize/test/UKBB_EPITHYR_EPIC_0.3'
 
     # Create your own object using `Harmoniza`
     test = Harmonize(referenceFile=referenceFile,
