@@ -16,13 +16,14 @@ from collections import defaultdict
 from standardizeModule import *
 
 class Harmonize():
-    def __init__(self, referenceFile, targetFile, referenceDict, targetDict, intersection, verbose):
+    def __init__(self, referenceFile, targetFile, referenceDict, targetDict, intersection, verbose,sampleSize):
         """
         :param referenceFile: The full path of your standardized reference file.
         :param targetFile: The full path of your standardized target file which you want to harmonize with reference
         :param referenceDict: The dictionary which contains the information of column name of reference file
         :param targetDict: The dictionary which contains the information of column name of target file
         :param intersection: to decide wheter to only include intersection part of both GWAS summary statistics or not
+        :param smapleSize: the sample size number
         """
 
         self.referenceFile = referenceFile
@@ -31,6 +32,7 @@ class Harmonize():
         self.targetDict = targetDict
         self.intersection = intersection
         self.verbose = verbose
+        self.sampleSize = sampleSize
 
     def getChrPosEAFInfo(self):
         ChrPosEAFDict = dict()
@@ -80,7 +82,9 @@ class Harmonize():
                                          self.targetDict['Beta'],
                                          self.targetDict['SD'],
                                          self.targetDict['p-value'],
-                                         'MAF'])
+                                         'MAF',
+                                         'N',
+                                         'chr_pos'])
         resultDict['diffGenotyped'].append([self.targetDict['SNP'],
                                             self.targetDict['Chromosome'],
                                             self.targetDict['Position'],
@@ -125,6 +129,7 @@ class Harmonize():
             target_beta = individual[indexPosition['Beta']]
             target_sd = individual[indexPosition['SD']]
             target_pValue = individual[indexPosition['p-value']]
+            target_chr_pos = target_chr + ":" + target_pos
 
             # Define the alternative allele
             alt_target_nonEffectAllele = findAlternativeAllele(target_nonEffectAllele)
@@ -149,7 +154,8 @@ class Harmonize():
                     if (target_nonEffectAllele == ref_nonEffectAllele and target_EffectAllele == ref_EffectAllele) or \
                             (alt_target_nonEffectAllele == ref_nonEffectAllele and alt_target_EffectAllele == ref_EffectAllele):
                         harmonizedList = [target_SNP, target_chr, target_pos, target_nonEffectAllele,target_EffectAllele,
-                                           str(target_EAF), str(target_beta), str(target_sd), str(target_pValue), str(MAF)]
+                                           str(target_EAF), str(target_beta), str(target_sd), str(target_pValue), str(MAF),
+                                          str(self.sampleSize), target_chr_pos]
                         resultDict['harmonized'].append(harmonizedList)
 
                     # Change the sign of beta & EAF to 1-EAF
@@ -157,7 +163,8 @@ class Harmonize():
                             (alt_target_nonEffectAllele == ref_EffectAllele and alt_target_EffectAllele == ref_nonEffectAllele):
                         nb_changed += 1
                         harmonizedList = [target_SNP, target_chr, target_pos, target_EffectAllele,target_nonEffectAllele,
-                                           str(1 - float(target_EAF)), str(-float(target_beta)), str(target_sd),str(target_pValue), str(MAF)]
+                                           str(1 - float(target_EAF)), str(-float(target_beta)), str(target_sd),str(target_pValue), str(MAF),
+                                          str(self.sampleSize), target_chr_pos]
                         changedList = [target_SNP, target_chr, target_pos, ref_nonEffectAllele, ref_EffectAllele, target_nonEffectAllele, target_EffectAllele]
                         resultDict['harmonized'].append(harmonizedList)
                         resultDict['changedBeta'].append(changedList)
@@ -189,7 +196,8 @@ class Harmonize():
                             nb_changed += 1
                             harmonizedList = [target_SNP, target_chr, target_pos, target_EffectAllele, target_nonEffectAllele,
                                                str(1 - float(target_EAF)), str(-float(target_beta)), str(target_sd),
-                                               str(target_pValue), str(MAF)]
+                                               str(target_pValue), str(MAF),
+                                              str(self.sampleSize), target_chr_pos]
                             changedList = [target_SNP, target_chr, target_pos, ref_nonEffectAllele,
                                            ref_EffectAllele, target_nonEffectAllele, target_EffectAllele]
                             resultDict['harmonized'].append(harmonizedList)
@@ -197,7 +205,8 @@ class Harmonize():
 
                         else:
                             harmonizedList = [target_SNP, target_chr, target_pos, target_nonEffectAllele, target_EffectAllele,
-                                               str(target_EAF), str(target_beta), str(target_sd), str(target_pValue),str(MAF)]
+                                               str(target_EAF), str(target_beta), str(target_sd), str(target_pValue),str(MAF),
+                                              str(self.sampleSize), target_chr_pos]
                             resultDict['harmonized'].append(harmonizedList)
 
                     # Both are palindromic, but different genotyped (discard)
@@ -215,7 +224,8 @@ class Harmonize():
                     resultDict['removed'].append(removedList)
                 else:
                     harmonizedList = [target_SNP, target_chr, target_pos, target_nonEffectAllele, target_EffectAllele,
-                                       str(target_EAF), str(target_beta), str(target_sd), str(target_pValue), str(MAF)]
+                                       str(target_EAF), str(target_beta), str(target_sd), str(target_pValue), str(MAF),
+                                      str(self.sampleSize), target_chr_pos]
                     resultDict['harmonized'].append(harmonizedList)
 
         if self.verbose:
@@ -236,10 +246,13 @@ class Harmonize():
         else:
             print("The output directory is already existed")
 
-        harmonized = open(f'{outputDir}/harmonized.txt', 'w')
-        diffGenotyped = open(f'{outputDir}/diffGenotyped.txt', 'w')
-        removed = open(f'{outputDir}/removed.txt', 'w')
-        changed = open(f'{outputDir}/changed.txt', 'w')
+        name = os.path.basename(self.targetFile)
+        name_without_ext = name[:name.rindex(".")]
+
+        harmonized = open(f'{outputDir}/{name_without_ext}_harmonized.txt', 'w')
+        diffGenotyped = open(f'{outputDir}/{name_without_ext}_diffGenotyped.txt', 'w')
+        removed = open(f'{outputDir}/{name_without_ext}_removed.txt', 'w')
+        changed = open(f'{outputDir}/{name_without_ext}_changed.txt', 'w')
 
         resultDict = self.harmonizeData()
         print("\n********* Writing & Saving results  *********\n")
@@ -260,44 +273,48 @@ class Harmonize():
 if __name__ == "__main__":
 
     # Define the full path where reference file is located.
-    referenceFile = '/home2/users/park/python_projects/harmonize/test/UKBB_EPITHYR_0.3/harmonized.txt'
+    referenceFile = '/home2/users/park/python_projects/harmonize/test/20230406_8STUDY/all_Epithyr_EPIC_UKBB_deCODE_0.3/all_Epithyr_EPIC_UKBB_deCODE_standardized.txt'
 
     # Define tge full path where target file is located.
-    targetFile = '/home2/users/park/python_projects/harmonize/test/UKBB_EPIC_0.3/harmonized.txt'
+    targetFile = '/home2/users/park/python_projects/harmonize/test/20230406_8STUDY/SummStat_deCODE_5GWAS.txt'
 
     # Define the column name in your own GWAS Summary Statistics
     # User needs to modify the 'value' part of the refInfoDict
     refInfoDict = {'SNP': 'SNP',
                    'Chromosome': 'chr',
                    'Position': 'pos',
-                   'nonEffectAllele': 'A1',
-                   'EffectAllele': 'A2',
-                   'EAF': 'freq2'}
+                   'nonEffectAllele': 'OA',
+                   'EffectAllele': 'EA',
+                   'EAF': 'EAF'}
 
     # User needs to modify the 'value' part of the targetInfoDict
     targetInfoDict = {'SNP': 'SNP',
                       'Chromosome': 'chr',
                       'Position': 'pos',
-                      'nonEffectAllele': 'A1',
-                      'EffectAllele': 'A2',
-                      'EAF': 'freq2',
-                      'Beta': 'beta',
-                      'SD': 'sd',
-                      'p-value': 'p'}
+                      'nonEffectAllele': 'OA',
+                      'EffectAllele': 'EA',
+                      'EAF': 'EAF',
+                      'Beta': 'Beta',
+                      'SD': 'SE',
+                      'p-value': 'P'}
 
     # True if user wants to include only overlapped SNPs (intersection)
     intersection = False
 
-    # Define the output directory where you want to save the result.
-    outputDir = '/home2/users/park/python_projects/harmonize/test/UKBB_EPITHYR_EPIC_0.3'
+    # Sample Size
+    sampleSize = 290551
 
-    # Create your own object using `Harmoniza`
+    # Define the output directory where you want to save the result.
+    outputDir = '/home2/users/park/python_projects/harmonize/test/20230406_8STUDY/deCODE_5GWAS'
+
+    # Create your own object using `Harmonize`
     test = Harmonize(referenceFile=referenceFile,
                      targetFile=targetFile,
                      referenceDict=refInfoDict,
                      targetDict=targetInfoDict,
                      intersection=intersection,
-                     verbose=True)
+                     verbose=True,
+                     sampleSize=sampleSize)
 
     # In case you want to save the result
     test.saveResult(outputDir=outputDir)

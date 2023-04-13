@@ -130,7 +130,7 @@ class Standardize:
 
                     setChrPos.add(ChrPos)
 
-                return (setDuplicated)
+                return setDuplicated
 
         except FileNotFoundError:
             print("Unable to open " + self.fileName + ":" + getLastExceptionDescription())
@@ -284,10 +284,13 @@ class Standardize:
         else:
             print("The output directory is already existed")
 
-        standardized = open(f'{outputDir}/standardized.txt', 'w')
-        palindromic = open(f'{outputDir}/palindromicSNP.txt', 'w')
-        duplicated = open(f'{outputDir}/duplicatedSNP.txt', 'w')
-        weird = open(f'{outputDir}/weirdAllelesSNP.txt', 'w')
+        name = os.path.basename(self.fileName)
+        name_without_ext = name[:name.rindex(".")]
+
+        standardized = open(f'{outputDir}/{name_without_ext}_standardized.txt', 'w')
+        palindromic = open(f'{outputDir}/{name_without_ext}_palindromicSNP.txt', 'w')
+        duplicated = open(f'{outputDir}/{name_without_ext}_duplicatedSNP.txt', 'w')
+        weird = open(f'{outputDir}/{name_without_ext}_weirdAllelesSNP.txt', 'w')
 
         resultDict = self.standardizeData()
         print("\n********* Writing & Saving results  *********\n")
@@ -306,22 +309,22 @@ class Standardize:
 if __name__ == "__main__":
 
     # Define the directory where input file is located
-    fileName = '/home2/users/park/python_projects/harmonize/test/GWAS_Thyr_Eur_CtrlsSafe_DTC_chrALL.txt'
+    fileName = '/home2/users/park/python_projects/harmonize/test/20230406_8STUDY/all_Epithyr_EPIC_UKBB_deCODE.txt'
 
     # Define the column name in your own GWAS Summary Statistics
     # User needs to modify the 'value' part of the columnInfoDict
-    columnInfoDict = {'SNP': 'ID',
-                      'Chromosome': '#CHROM',
-                      'Position': 'POS',
-                      'nonEffectAllele': 'ALT',
-                      'EffectAllele': 'REF',
-                      'EAF': 'A1_FREQ',
-                      'Beta': 'BETA',
+    columnInfoDict = {'SNP': 'SNP',
+                      'Chromosome': 'chr',
+                      'Position': 'pos',
+                      'nonEffectAllele': 'OA',
+                      'EffectAllele': 'EA',
+                      'EAF': 'EAF',
+                      'Beta': 'Beta',
                       'SD': 'SE',
                       'p-value': 'P'}
 
     # Define the output directory where you want to save the result.
-    outputDir = '/home2/users/park/python_projects/harmonize/test/UKBB'
+    outputDir = '/home2/users/park/python_projects/harmonize/test/20230406_8STUDY/all_Epithyr_EPIC_UKBB_deCODE_0.3'
 
     # Users can set up the palindromic threshold value.
     # Allow palindromic allele when their EAF is below than palindromic Threshold
