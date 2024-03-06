@@ -17,7 +17,7 @@ https://cesp.inserm.fr/en/equipe/exposome-and-heredity
   - [Harmonize](#harmonize)
         
 ## <a id="notes" /> Notes
-The use of external Summary Statistics in genome-wide association study (GWAS) can significantly increase the size and diversity of the sample, increasing the power to detect association analysis. However, due to batch effects, genotyping errors, and the use of different genotyping platforms, the aggregation of multiple GWAS summary statistics can be quite challenging and difficult. Recent GWASs typically present the effects of a SNP with respect to alleles in the forward strand. However, the forward strands change from time to time as reference panels are updated, and GWASs from a few years ago cannot be guaranteed to use forward strand conventions.
+The use of external Summary Statistics in genome-wide association studies (GWAS) can significantly increase the size and diversity of the sample, increasing the power to detect association analysis. However, due to batch effects, genotyping errors, and the use of different genotyping platforms, the aggregation of multiple GWAS summary statistics can be quite challenging and difficult. Recent GWASs typically present the effects of a SNP with respect to alleles in the forward strand. However, the forward strands change from time to time as reference panels are updated, and GWASs from a few years ago cannot be guaranteed to use forward strand conventions.
 If these GWAS summary statistics are not carefully quality controlled, the incorrect results might be derived when performing meta-analysis. 
 
 
@@ -26,23 +26,23 @@ The purpose of this package is to provide the data harmonization pipeline that a
 
 ## <a id="modules" /> Modules and How to use
 ### <a id="standardize" /> Standardize
-The Standardize module scans throught the GWAS summary statistics and standardize (***remove***) the SNPs according to the following criteria.
-- **Null:** Null or NA values are genotyped at eigher beta, effect allele frequency or p-value.
+The Standardize module scans through the GWAS summary statistics and standardizes (***remove***) the SNPs according to the following criteria.
+- **Null:** Null or NA values are genotyped at either beta, effect allele frequency, or p-value.
 - **Weird:** Genotypes are not based on combinations of 'ATCG'.
 - **Duplicate:** The identical SNP is expressed in duplicate.
 - **Palindromic:** The palindromic SNP, such that the alleles on the forward strand are the same as on the reverse strand (A/T on forward is T/A on the reverse). 
 
 
-The Standardize module take 4 arguments as paramters
-- **fileName:** The name of GWAS summary statistics file with a full pathway
-- **columnInfoDict:** A python dictionary where user must enter the following information SNP, Chromosome, Position, non-Effect Allele, Effect Allele, EAF, Beta, SD, and p-value in the **VALUES** part of the columnInfoDict **{keys : values}**.
+The Standardize module takes 4 arguments as parameters
+- **fileName:** The name of the GWAS summary statistics file with a full pathway
+- **columnInfoDict:** A python dictionary where the user must enter the following information SNP, Chromosome, Position, non-Effect Allele, Effect Allele, EAF, Beta, SD, and p-value in the **VALUES** part of the columnInfoDict **{keys : values}**.
 - **palindromicThreshold:** If **palindromicThreshold == None**, it implies that we ultimately remove all palindromic SNPs.  
 However, we can sometimes infer which genotype is the forward strand by looking at the effect allele frequencies. The palindromic threshold allows palindromic SNPs when the EAF is lower than palindromic threshold or higher than 1 - palindromicThreshold. 
-For instance, if user enters palindromicThreshold = 0.2, the EAF of palindromic SNPs below 0.2 and above 0.8 will remain in the GWAS summary statistics. 
+For instance, if the user enters palindromicThreshold = 0.2, the EAF of palindromic SNPs below 0.2 and above 0.8 will remain in the GWAS summary statistics. 
 - **verbose:** It prints the number of SNPs removed.
 
-After creating an object of the Standardize class, user can use the **saveResult** method to save the result using the output directory taken as an input argument. 
-- **outputDir:** The name of the output directory where user wants to save to. 
+After creating an object of the Standardize class, the user can use the **saveResult** method to save the result using the output directory taken as an input argument. 
+- **outputDir:** The name of the output directory where the user wants to save to. 
 
 If so, you will have the following four **.txt** files in the output directory.
 - **standardized.txt**
@@ -54,7 +54,7 @@ If so, you will have the following four **.txt** files in the output directory.
 ```c
 from standardizeModule import *
 
-# Define the directory where input file is located
+# Define the directory where the input file is located
 fileName = '/home2/users/park/python_projects/harmonize/test/GWAS_Thyr_Eur_CtrlsSafe_DTC_chrALL.txt'
 
 # Define the column name in your own GWAS Summary Statistics
@@ -120,10 +120,10 @@ target effect allele = T
 target non-effect allele = G
 target EAF = 0.61
 ```
-Here the target allele is presendting the effect for the alternate allele on the reverse strand. We need to **flip** the target effect to **-0.056** to correspond to the same alleles as the reference on the forward strand, and also we need to inverser the EAF as **1-0.61 = 0.39**
+Here the target allele is presenting the effect of the alternate allele on the reverse strand. We need to **flip** the target effect to **-0.056** to correspond to the same alleles as the reference on the forward strand, and also we need to inverse the EAF as **1-0.61 = 0.39**
 
 #### Palindromic SNP, inferrable
-It depends on the **palindromicThreshold** value. If user initailly enter **None**, there would be no palindromic SNPs appeared after standardized GWAS summary statistics. On the other hands, if **palindromicThreshold = 0.1** for instance, then we might have a below case. 
+It depends on the **palindromicThreshold** value. If the user initially entered **None**, there would be no palindromic SNPs appearing after standardized GWAS summary statistics. On the other hand, if **palindromicThreshold = 0.1** for instance, then we might have a below case. 
 
 ```c
 reference beta = 0.20
@@ -139,18 +139,18 @@ target EAF = 0.91
 Since we are giving the information about the EAF, we can infer that the target GWAS is presenting the effect on the reverse strand for the alternative allele. We need to flip the effect to **0.046** and also EAF to **1-0.91 = 0.09**.
 
 
-The Harmonize module take 6 arguments as paramters
+The Harmonize module takes 6 arguments as parameters
 - **referenceFile:** The name of reference GWAS summary statistics file with a full pathway
-- **targetFile:** The name of target GWAS summary statistics file with a full pathway
+- **targetFile:** The name of the target GWAS summary statistics file with a full pathway
 - **referenceDict:** A python dictionary where user must enter the following **reference GWAS summary statistics** information SNP, Chromosome, Position, non-Effect Allele, Effect Allele, and EAF in the **VALUES** part of the columnInfoDict **{keys : values}**.
-- **targetDict:** A python dictionary where user must enter the following **target GWAS summary statistics** information SNP, Chromosome, Position, non-Effect Allele, Effect Allele, EAF, Beta, SD, and p-value in the **VALUES** part of the columnInfoDict **{keys : values}**.
-- **intersection:** True, if user only want to harmonize the overlapped SNPs (**intersection**) 
+- **targetDict:** A python dictionary where the user must enter the following **target GWAS summary statistics** information SNP, Chromosome, Position, non-Effect Allele, Effect Allele, EAF, Beta, SD, and p-value in the **VALUES** part of the columnInfoDict **{keys : values}**.
+- **intersection:** True, if the user only wants to harmonize the overlapped SNPs (**intersection**) 
 - **verbose:** It prints the number of SNPs unharmonized.
 
 
 
-After creating an object of the Harmonize class, user can use the **saveResult** method to save the result using the output directory taken as an input argument. 
-- **outputDir:** The name of the output directory where user wants to save to. 
+After creating an object of the Harmonize class, the user can use the **saveResult** method to save the result using the output directory taken as an input argument. 
+- **outputDir:** The name of the output directory where the user wants to save to. 
 
 If so, you will have the following four **.txt** files in the output directory.
 - **harmonized.txt** 
@@ -160,10 +160,10 @@ If so, you will have the following four **.txt** files in the output directory.
 
 #### Harmonize Code
 ```c
-# Define the full path where reference file is located.
+# Define the full path where the reference file is located.
 referenceFile = '/home2/users/park/python_projects/harmonize/test/EPITHYR/standardized.txt'
 
-# Define tge full path where target file is located.
+# Define tge full path where the target file is located.
 targetFile = '/home2/users/park/python_projects/harmonize/test/UKBB/standardized.txt'
 
 # Define the column name in your own GWAS Summary Statistics
@@ -185,7 +185,7 @@ targetInfoDict = {'SNP': 'ID',
                   'SD': 'SE',
                   'p-value': 'P'}
 
-# True if user wants to include only overlapped SNPs (intersection)
+# True if the user wants to include only overlapped SNPs (intersection)
 intersection = True
 
 # Define the output directory where you want to save the result.
